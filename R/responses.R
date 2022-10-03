@@ -9,10 +9,10 @@
 #' @import tidyr
 #' @import dplyr
 getSyllabusResponses <- function(syllabusId, connStr) {
-  tasks <- mongolite::mongo('tasks', url = connStr)
+  tasks <- mongolite::mongo('pages', url = connStr)
   pipeline <- paste0(
     '
-    [
+     [
         {
             "$match" : {
                 "syllabus" : "',syllabusId,'"
@@ -20,22 +20,8 @@ getSyllabusResponses <- function(syllabusId, connStr) {
         },
         {
             "$lookup" : {
-                "from" : "pages",
-                "localField" : "_id",
-                "foreignField" : "taskid",
-                "as" : "taskPages"
-            }
-        },
-        {
-            "$unwind" : {
-                "path" : "$taskPages",
-                "preserveNullAndEmptyArrays" : false
-            }
-        },
-        {
-            "$lookup" : {
                 "from" : "questions",
-                "localField" : "taskPages._id",
+                "localField" : "_id",
                 "foreignField" : "pageid",
                 "as" : "questionResponses"
             }
@@ -48,16 +34,10 @@ getSyllabusResponses <- function(syllabusId, connStr) {
         },
         {
             "$project" : {
-                "task" : "$name",
-                "dfe" : "$school",
-                "yg" : "$yg",
                 "rawTotal" : "$rawTotal",
                 "selected" : "$questionResponses.selected",
                 "question" : "$questionResponses.question",
-                "person" : "$questionResponses.pageid",
-                "firstName" : "$taskPages.bio.firstName",
-                "lastName" : "$taskPages.bio.lastName",
-                "dob" : "$taskPages.bio.dob"
+                "person" : "$questionResponses.pageid"
             }
         }
     ]

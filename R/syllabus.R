@@ -8,7 +8,7 @@
 #' @export
 #' @import tidyr
 #' @import dplyr
-getSyllabus <- function(syllabusId, connStr) {
+getSyllabusById <- function(syllabusId, connStr) {
   syllabus <- mongolite::mongo('syllabuses', url = connStr)
   pipeline <- paste0('
     [
@@ -20,4 +20,28 @@ getSyllabus <- function(syllabusId, connStr) {
     ]')
     syllabusO <- syllabus$aggregate(pipeline,options = '{"allowDiskUse":true}')
     return(syllabusO)
+}
+
+#' Get responses from a syllabus
+#'
+#' @param name The syllabus Name
+#' @param connStr A connection string.
+#' @return A data frame with syllabus details
+#' @examples
+#' getSyllabus('ISW 2022-2023 Year 7 Sept', 'mongodb://')
+#' @export
+#' @import tidyr
+#' @import dplyr
+getSyllabusByName <- function(name, connStr) {
+  syllabus <- mongolite::mongo('syllabuses', url = connStr)
+  pipeline <- paste0('
+    [
+        {
+            "$match" : {
+                "name" : "',name,'"
+            }
+        }
+    ]')
+  syllabusO <- syllabus$aggregate(pipeline,options = '{"allowDiskUse":true}')
+  return(syllabusO)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/answers.R
 \name{getAnswers}
 \alias{getAnswers}
-\title{Get responses from a syllabus}
+\title{Get the answer set from a syllabus}
 \usage{
 getAnswers(answerSetId, connStr)
 }
@@ -15,7 +15,7 @@ getAnswers(answerSetId, connStr)
 A data frame with responses.
 }
 \description{
-Get responses from a syllabus
+Get the answer set from a syllabus
 }
 \examples{
 getAnswers('67059790-569b-440f-a858-bddabf313e07', 'mongodb://')

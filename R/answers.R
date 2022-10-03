@@ -1,4 +1,4 @@
-#' Get responses from a syllabus
+#' Get the answer set from a syllabus
 #'
 #' @param answerSetId The answer set ID.
 #' @param connStr A connection string.
