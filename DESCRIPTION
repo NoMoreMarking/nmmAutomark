@@ -1,7 +1,7 @@
 Package: nmmAutoMark
 Type: Package
 Title: Retrieves automark data
-Version: 0.3.0
+Version: 0.3.1
 Author: Chris Wheadon
 Maintainer: Chris Wheadon <chris@nomoremarking.com>
 Description: Retrieves automark data
