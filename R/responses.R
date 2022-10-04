@@ -12,7 +12,7 @@ getSyllabusResponses <- function(syllabusId, connStr) {
   tasks <- mongolite::mongo('pages', url = connStr)
   pipeline <- paste0(
     '
-     [
+         [
         {
             "$match" : {
                 "syllabus" : "',syllabusId,'"
@@ -21,8 +21,28 @@ getSyllabusResponses <- function(syllabusId, connStr) {
         {
             "$lookup" : {
                 "from" : "questions",
-                "localField" : "_id",
-                "foreignField" : "pageid",
+                "let" : {
+                    "task" : "$_id"
+                },
+                "pipeline" : [
+                    {
+                        "$match" : {
+                            "$expr" : {
+                                "$eq" : [
+                                    "$$task",
+                                    "$pageid"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "$project" : {
+                            "question" : 1.0,
+                            "selected" : 1.0,
+                            "pageid" : 1.0
+                        }
+                    }
+                ],
                 "as" : "questionResponses"
             }
         },
@@ -30,14 +50,6 @@ getSyllabusResponses <- function(syllabusId, connStr) {
             "$unwind" : {
                 "path" : "$questionResponses",
                 "preserveNullAndEmptyArrays" : false
-            }
-        },
-        {
-            "$project" : {
-                "rawTotal" : "$rawTotal",
-                "selected" : "$questionResponses.selected",
-                "question" : "$questionResponses.question",
-                "person" : "$questionResponses.pageid"
             }
         }
     ]
