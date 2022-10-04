@@ -1,63 +1,41 @@
 #' Get responses from a syllabus
 #'
-#' @param syllabusId The syllabus ID.
+#' @param task_ids A vector of task ids.
 #' @param connStr A connection string.
 #' @return A data frame with responses.
 #' @examples
-#' getSyllabusResponses('67059790-569b-440f-a858-bddabf313e07', 'mongodb://')
+#' getResponsesByTask(taskids, 'mongodb://')
 #' @export
 #' @import tidyr
 #' @import dplyr
-getSyllabusResponses <- function(syllabusId, connStr) {
-  tasks <- mongolite::mongo('pages', url = connStr)
+getResponsesByTask <- function(task_ids, connStr) {
+  taskStr <- paste(task_ids,collapse='","')
+  questions <- mongolite::mongo('questions', url = connStr)
   pipeline <- paste0(
     '
          [
         {
             "$match" : {
-                "syllabus" : "',syllabusId,'"
+                "taskid" : {
+                    "$in" : [
+                        "',taskStr,'"
+                    ]
+                }
             }
         },
         {
-            "$lookup" : {
-                "from" : "questions",
-                "let" : {
-                    "task" : "$_id"
-                },
-                "pipeline" : [
-                    {
-                        "$match" : {
-                            "$expr" : {
-                                "$eq" : [
-                                    "$$task",
-                                    "$pageid"
-                                ]
-                            }
-                        }
-                    },
-                    {
-                        "$project" : {
-                            "question" : 1.0,
-                            "selected" : 1.0,
-                            "pageid" : 1.0
-                        }
-                    }
-                ],
-                "as" : "questionResponses"
-            }
-        },
-        {
-            "$unwind" : {
-                "path" : "$questionResponses",
-                "preserveNullAndEmptyArrays" : false
+            "$project" : {
+                "question" : "$question",
+                "selected" : "$selected",
+                "candidate" : "$pageid",
+                "taskid" : "$taskid"
             }
         }
     ]
     '
   )
 
-  responses <- tasks$aggregate(pipeline,options = '{"allowDiskUse":true}')
-  responses <- responses %>% pivot_wider(names_from=question, values_from=selected, names_prefix='Q')
-  responses <- responses %>% select(-`_id`)
+  responses <- questions$aggregate(pipeline,options = '{"allowDiskUse":true}')
+  responses <- responses %>% select(question, selected, candidate) %>% pivot_wider(names_from=question, values_from=selected, names_prefix='Q')
   return(responses)
 }
