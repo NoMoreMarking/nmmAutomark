@@ -26,7 +26,8 @@ getPersonsByTask <- function(task_ids, connStr) {
         },
         {
             "$project" : {
-                "bio" : "$bio"
+                "bio" : "$bio",
+                "taskid" : "$taskid"
             }
         }
     ]
